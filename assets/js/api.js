@@ -58,7 +58,7 @@
     return data;
   }
 
-  // helpers for dropdowns (FKs)
+
   async function options(entity, labelKey='name', valueKey) {
     const { list:src, pk } = metaOf(entity);
     const key = valueKey || pk;

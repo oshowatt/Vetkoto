@@ -2,7 +2,7 @@ if (!window.VetKotoAPI) {
   console.warn('VetKotoAPI not ready. Ensure api.js loads before ui.js, and Supabase client is initialized.');
 }
 
-// assets/js/ui.js — UI wiring with Supabase CRUD
+
 (function () {
   'use strict';
   const $  = (sel, ctx=document) => ctx.querySelector(sel);
@@ -10,8 +10,7 @@ if (!window.VetKotoAPI) {
   const schema = window.VetKotoSchema || {};
   const api    = window.VetKotoAPI;
 
-  // Map FK fields to options source
-  // key = field name in that entity; value = { entity: 'owners', labelKey?: 'name', valueKey?: 'owner_id' }
+  
   const FK = {
     patients: { owner_id: { entity: 'owners', labelKey: 'name' } },
     visits:   { patient_id: { entity: 'patients', labelKey: 'name' }, veterinarian_id: { entity: 'veterinarians', labelKey: 'name' } },
