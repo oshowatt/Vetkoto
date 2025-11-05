@@ -1,46 +1,45 @@
-// assets/js/ui.js
+if (!window.VetKotoAPI) {
+  console.warn('VetKotoAPI not ready. Ensure api.js loads before ui.js, and Supabase client is initialized.');
+}
+
+// assets/js/ui.js — UI wiring with Supabase CRUD
 (function () {
   'use strict';
-
-  // ---------- DOM helpers ----------
-  const $  = (sel, ctx = document) => ctx.querySelector(sel);
-  const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
-
-  // ---------- External modules ----------
+  const $  = (sel, ctx=document) => ctx.querySelector(sel);
+  const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
   const schema = window.VetKotoSchema || {};
   const api    = window.VetKotoAPI;
 
-  if (!api) {
-    console.warn('VetKotoAPI not found. Using UI without data layer.');
-  }
+  // Map FK fields to options source
+  // key = field name in that entity; value = { entity: 'owners', labelKey?: 'name', valueKey?: 'owner_id' }
+  const FK = {
+    patients: { owner_id: { entity: 'owners', labelKey: 'name' } },
+    visits:   { patient_id: { entity: 'patients', labelKey: 'name' }, veterinarian_id: { entity: 'veterinarians', labelKey: 'name' } },
+    prescriptions: { visit_id: { entity: 'visits', labelKey: 'visit_id' }, medication_id: { entity: 'medications', labelKey: 'name' } },
+    allergies: { patient_id: { entity: 'patients', labelKey: 'name' } },
+    vaccinations: { patient_id: { entity: 'patients', labelKey: 'name' } }
+  };
 
-  // ---------- Table rendering ----------
-  function renderTableHeader(entity, table) {
-    if (!schema[entity]) return;
+  function renderTableHeader(entity, table){
     const tr = document.createElement('tr');
     schema[entity].columns.forEach(col => {
-      const th = document.createElement('th');
-      th.textContent = col.label;
-      tr.appendChild(th);
+      const th = document.createElement('th'); th.textContent = col.label; tr.appendChild(th);
     });
-    table.tHead.innerHTML = '';
-    table.tHead.appendChild(tr);
+    table.tHead.innerHTML = ''; table.tHead.appendChild(tr);
   }
 
-  async function renderTableBody(entity, table) {
-    if (!schema[entity]) return;
-    // Fallback to empty list if API missing
-    const rows = api?.list ? await api.list(entity) : [];
-    const tbody = table.tBodies[0];
-    tbody.innerHTML = '';
+  async function renderTableBody(entity, table, filter){
+    const rows = await api.list(entity, { filter });
+    const tbody = table.tBodies[0]; tbody.innerHTML = '';
     rows.forEach(row => {
       const tr = document.createElement('tr');
       schema[entity].columns.forEach(col => {
         const td = document.createElement('td');
         if (col.key === 'actions') {
-          td.innerHTML =
-            `<button class="btn" data-edit="${row.id}" data-entity="${entity}">Edit</button>
-             <button class="btn danger" data-del="${row.id}" data-entity="${entity}">Delete</button>`;
+          td.innerHTML = `
+            <button class="btn" data-edit="${row[schema[entity].columns[0].key] || row.id}" data-entity="${entity}">Edit</button>
+            <button class="btn danger" data-del="${row[schema[entity].columns[0].key] || row.id}" data-entity="${entity}">Delete</button>
+          `;
         } else {
           td.textContent = row[col.key] ?? '';
         }
@@ -50,106 +49,118 @@
     });
   }
 
-  // ---------- Modal + Form ----------
-  function buildForm(entity, record = {}) {
-    const wrap = $('#formFields');
-    if (!wrap || !schema[entity]) return;
-    wrap.innerHTML = '';
-    schema[entity].fields.forEach(f => {
-      const div   = document.createElement('div'); div.className = 'field';
-      const label = document.createElement('label');
-      label.textContent = f.label + (f.required ? ' *' : '');
+  async function buildFieldInput(entity, f, record) {
+    const fkConfig = FK[entity]?.[f.key];
+    if (fkConfig) {
+      const sel = document.createElement('select');
+      sel.className = 'input'; sel.name = f.key;
+      const opts = await api.options(fkConfig.entity, fkConfig.labelKey, fkConfig.valueKey);
+      sel.innerHTML = `<option value="">— Select —</option>` +
+        opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+      if (record && record[f.key] != null) sel.value = record[f.key];
+      return sel;
+    } else {
       const input = document.createElement('input');
-      input.className = 'input';
-      input.name = f.key;
-      input.type = f.type || 'text';
+      input.className = 'input'; input.name = f.key; input.type = f.type || 'text';
       if (f.placeholder) input.placeholder = f.placeholder;
-      if (f.required)    input.required = true;
-      if (record[f.key] != null) input.value = record[f.key];
-      div.append(label, input);
-      wrap.appendChild(div);
-    });
+      if (f.required) input.required = true;
+      if (record && record[f.key] != null) input.value = record[f.key];
+      return input;
+    }
   }
 
-  function openModal(entity, mode = 'create', record = {}) {
-    const titleEl   = $('#modalTitle');
-    const formEl    = $('#entityForm');
-    const deleteBtn = $('#deleteBtn');
-    const backdrop  = $('#modalBackdrop');
+  async function buildForm(entity, record = {}) {
+    const wrap = $('#formFields'); if (!wrap) return;
+    wrap.innerHTML = '';
+    // hidden PK for edit
+    const pk = schema[entity]?.columns?.[0]?.key;
+    if (record && pk && record[pk] != null) {
+      const hid = document.createElement('input');
+      hid.type = 'hidden'; hid.name = pk; hid.value = record[pk];
+      wrap.appendChild(hid);
+    }
+    for (const f of schema[entity].fields) {
+      const div = document.createElement('div'); div.className = 'field';
+      const label = document.createElement('label'); label.textContent = f.label + (f.required ? ' *' : '');
+      const input = await buildFieldInput(entity, f, record);
+      div.append(label, input); wrap.appendChild(div);
+    }
+  }
 
-    if (!formEl || !titleEl || !backdrop) return;
-    titleEl.textContent = `${mode === 'create' ? 'Create' : 'Update'} ${entity.replace(/\b\w/g, c => c.toUpperCase())}`;
-    formEl.dataset.entity = entity;
-    formEl.dataset.mode   = mode;
-    if (deleteBtn) deleteBtn.hidden = mode !== 'edit';
-
-    buildForm(entity, record);
+  async function openModal(entity, mode='create', id=null){
+    const titleEl = $('#modalTitle'); const formEl = $('#entityForm'); const delBtn = $('#deleteBtn'); const backdrop = $('#modalBackdrop');
+    const nice = s => s.replace(/\b\w/g, c => c.toUpperCase());
+    titleEl.textContent = `${mode === 'create' ? 'Create' : 'Update'} ${nice(entity)}`;
+    formEl.dataset.entity = entity; formEl.dataset.mode = mode;
+    if (delBtn) delBtn.hidden = mode !== 'edit';
+    const record = mode === 'edit' && id ? await api.get(entity, id) : {};
+    await buildForm(entity, record);
     backdrop.style.display = 'flex';
   }
 
-  function closeModal() {
-    const backdrop = $('#modalBackdrop');
-    if (backdrop) backdrop.style.display = 'none';
-  }
+  function closeModal(){ $('#modalBackdrop').style.display = 'none'; }
 
-  // ---------- Section hydration ----------
-  function hydrateEntitySection(entity) {
-    const root  = document.getElementById(entity);
-    if (!root) return;
+  function hydrateEntitySection(entity){
+    const root = document.getElementById(entity); if (!root) return;
     const table = root.querySelector('table');
-    if (table) {
-      if (!table.tHead) table.createTHead();
-      if (!table.tBodies[0]) table.createTBody();
-      renderTableHeader(entity, table);
-      renderTableBody(entity, table);
-    }
+    if (table) { if (!table.tHead) table.createTHead(); if (!table.tBodies[0]) table.createTBody(); renderTableHeader(entity, table); renderTableBody(entity, table); }
+    // Create button
     const createBtn = root.querySelector('[data-action="create"]');
-    if (createBtn) {
-      createBtn.addEventListener('click', () => openModal(entity, 'create'));
+    if (createBtn) createBtn.addEventListener('click', () => openModal(entity, 'create'));
+    // Search (Owners & Patients wired; copy this pattern for others)
+    const searchEl = root.querySelector('input[id$="Search"]');
+    if (searchEl && table) {
+      searchEl.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        const firstTextCol = schema[entity].columns.find(c => c.key !== 'actions' && c.key !== (schema[entity].columns[0].key));
+        const col = (entity === 'owners') ? 'name' : (entity === 'patients' ? 'name' : (firstTextCol?.key || schema[entity].columns[1].key));
+        const filter = query ? { column: col, value: query } : undefined;
+        renderTableBody(entity, table, filter);
+      });
     }
   }
 
-  // ---------- Expose small UI API ----------
+  // expose UI helpers
   window.VetKotoUI = { $, $$, openModal, closeModal, hydrateEntitySection };
 
-  // ---------- Modal wiring ----------
+  // modal controls
   $('#closeModal')?.addEventListener('click', closeModal);
   $('#resetBtn')?.addEventListener('click', () => $('#entityForm')?.reset());
 
   $('#entityForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const form   = e.currentTarget;
-    const entity = form.dataset.entity;
-    const mode   = form.dataset.mode;
+    const form = e.currentTarget; const entity = form.dataset.entity; const mode = form.dataset.mode;
     const payload = Object.fromEntries(new FormData(form).entries());
-    if (!api) return;
-
-    const res = mode === 'create'
-      ? await api.create(entity, payload)
-      : await api.update(entity, payload);
-
-    alert(`[Outline] ${mode.toUpperCase()} → ${entity}\n` + JSON.stringify(res, null, 2));
-    closeModal();
-
-    const table = document.querySelector(`#${entity} table`);
-    if (table) renderTableBody(entity, table);
+    try {
+      const res = mode === 'create' ? await api.create(entity, payload) : await api.update(entity, payload);
+      alert(`${mode.toUpperCase()} → ${entity}\n` + JSON.stringify(res, null, 2));
+      closeModal();
+      const table = document.querySelector(`#${entity} table`);
+      if (table) renderTableBody(entity, table);
+    } catch (err) {
+      alert('Error: ' + (err?.message || err));
+      console.error(err);
+    }
   });
 
-  // ---------- Delete via event delegation ----------
+  // edit/delete delegation
   document.body.addEventListener('click', async (e) => {
     const t = e.target;
     if (t.matches?.('[data-edit]')) {
-      openModal(t.dataset.entity, 'edit', { id: t.dataset.edit });
+      openModal(t.dataset.entity, 'edit', t.dataset.edit);
     }
     if (t.matches?.('[data-del]')) {
-      if (!api) return;
       if (confirm('Delete this record?')) {
-        await api.remove(t.dataset.entity, t.dataset.del);
-        alert(`[Outline] DELETE ${t.dataset.entity} id=${t.dataset.del}`);
-        const table = document.querySelector(`#${t.dataset.entity} table`);
-        if (table) renderTableBody(t.dataset.entity, table);
+        try {
+          await api.remove(t.dataset.entity, t.dataset.del);
+          alert(`Deleted ${t.dataset.entity} id=${t.dataset.del}`);
+          const table = document.querySelector(`#${t.dataset.entity} table`);
+          if (table) renderTableBody(t.dataset.entity, table);
+        } catch (err) {
+          alert('Error: ' + (err?.message || err));
+          console.error(err);
+        }
       }
     }
   });
-
 })();
