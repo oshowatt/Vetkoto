@@ -1,0 +1,163 @@
+@import url('sidebar.css');
+@import url('topbar.css');
+@import url('modal.css');
+
+
+/* Body padding to prevent content from hiding behind the navbar */
+body {
+  padding-top: 60px; /* Adjust this to the height of your topbar */
+}
+
+/* Style for the main content */
+.main-content {
+  padding: 20px;
+}
+
+/* Main Content Area */
+.main {
+  margin-left: 0; /* Initially no margin */
+  padding: 20px;
+  transition: margin-left 0.3s ease; /* Smooth transition for content shift */
+}
+
+.main.shift {
+  margin-left: 250px; /* Space for the sidebar */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #3E9E5B; /* Primary Green for headings */
+}
+
+a {
+  text-decoration: none;
+  color: #3E9E5B; /* Green links */
+}
+
+a:hover {
+  color: #8AC27E; /* Lighter green on hover */
+}
+
+/* Header Style */
+header {
+  background-color: #3E9E5B; /* Primary Green */
+  color: #FFFFFF; /* White text */
+  padding: 20px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+/* Footer Style */
+footer {
+  background-color: #3E9E5B; /* Primary Green */
+  color: #FFFFFF; /* White text */
+  text-align: center;
+  padding: 10px 0;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}
+
+footer p {
+  margin: 0;
+}
+
+/* Button Styles */
+.btn {
+  background-color: #3E9E5B; /* Primary Green */
+  color: #FFFFFF; /* White text */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #8AC27E; /* Lighter Green on hover */
+}
+
+/* Container for Section */
+.section-container {
+  padding: 30px;
+}
+
+/* Card Style for Sections */
+.card {
+  background-color: #FFFFFF; /* White background for cards */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card h3 {
+  color: #3E9E5B; /* Primary Green for section headings */
+  font-size: 24px;
+}
+
+/* Table Style */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #3E9E5B; /* Green header */
+  color: #FFFFFF; /* White text in header */
+}
+
+td {
+  background-color: #F9F9F9; /* Light gray for table rows */
+}
+
+/* Search Input */
+.input {
+  padding: 8px 12px;
+  font-size: 16px;
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+/* Form Input */
+input[type="text"], input[type="number"], input[type="date"], select {
+  padding: 8px 12px;
+  font-size: 16px;
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+
+/* Form Submit and Reset Buttons */
+button[type="submit"], button[type="reset"] {
+  background-color: #3E9E5B; /* Primary Green */
+  color: #FFFFFF;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover, button[type="reset"]:hover {
+  background-color: #8AC27E; /* Lighter Green on hover */
+}
+

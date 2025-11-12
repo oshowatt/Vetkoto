@@ -1,0 +1,58 @@
+/* Topbar Styles */
+.topbar {
+  background-color: #3E9E5B; /* Primary Green */
+  color: white;
+  padding: 10px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000; /* Ensure it stays on top */
+}
+
+/* Brand Logo */
+.topbar .brand {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Spacing between logo and menu */
+.topbar .spacer {
+  flex-grow: 1;
+}
+
+/* Topbar Navigation */
+#topbar-nav {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+}
+
+#topbar-nav li {
+  list-style: none;
+  margin: 0 20px;
+}
+
+#topbar-nav li button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  cursor: pointer;
+}
+
+#topbar-nav li button:hover {
+  background-color: #8AC27E; /* Lighter green on hover */
+}
+
+/* Body padding to prevent content from hiding behind the topbar */
+body {
+  padding-top: 60px; /* Adjust this to the height of your topbar */
+}
+
+
+

@@ -3,6 +3,17 @@ if (!window.VetKotoAPI) {
 }
 
 
+// Toggle sidebar visibility on button click
+const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+const sidebar = document.getElementById('sidebar');
+const mainContent = document.getElementById('app');
+
+toggleSidebarBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('open');  // Add or remove the 'open' class to show/hide the sidebar
+  mainContent.classList.toggle('shift');  // Add or remove the 'shift' class to shift the main content
+});
+
+
 (function () {
   'use strict';
   const $  = (sel, ctx=document) => ctx.querySelector(sel);
@@ -11,12 +22,14 @@ if (!window.VetKotoAPI) {
   const api    = window.VetKotoAPI;
 
   
+
+  
   const FK = {
-    patients: { owner_id: { entity: 'owners', labelKey: 'name' } },
-    visits:   { patient_id: { entity: 'patients', labelKey: 'name' }, veterinarian_id: { entity: 'veterinarians', labelKey: 'name' } },
-    prescriptions: { visit_id: { entity: 'visits', labelKey: 'visit_id' }, medication_id: { entity: 'medications', labelKey: 'name' } },
-    allergies: { patient_id: { entity: 'patients', labelKey: 'name' } },
-    vaccinations: { patient_id: { entity: 'patients', labelKey: 'name' } }
+    patients: { owner_id: { entity: 'owners', labelKey: 'owner_name' } },
+    visits:   { patient_id: { entity: 'patients', labelKey: 'patient_name' }, veterinarian_id: { entity: 'veterinarians', labelKey: 'vet_name' } },
+    prescriptions: { visit_id: { entity: 'visits', labelKey: 'visit_id' }, medication_id: { entity: 'medications', labelKey: 'med_name' } },
+    allergies: { patient_id: { entity: 'patients', labelKey: 'patient_name' } },
+    vaccinations: { patient_id: { entity: 'patients', labelKey: 'patient_name' } }
   };
 
   function renderTableHeader(entity, table){

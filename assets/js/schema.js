@@ -58,12 +58,12 @@ prescriptions:{
   veterinarians: {
     columns: [
       { key: 'veterinarian_id', label: 'ID' },
-      { key: 'name', label: 'Name' },
+      { key: 'vet_name', label: 'Name' },
       { key: 'license', label: 'License' },
       { key: 'actions', label: 'Actions' }
     ],
     fields: [
-      { key: 'name', label: 'Full Name', type: 'text', required: true },
+      { key: 'vet_name', label: 'Full Name', type: 'text', required: true },
       { key: 'license', label: 'License No.', type: 'text' }
     ],
     endpoint: '/api/veterinarians.php'
@@ -73,14 +73,14 @@ prescriptions:{
   columns: [
     { key: 'patient_id', label: 'ID' },
     { key: 'owner_name', label: 'Owner' },
-    { key: 'name', label: 'Pet Name' },
+    { key: 'patient_name', label: 'Pet Name' },
     { key: 'species', label: 'Species' },
     { key: 'breed', label: 'Breed' },
     { key: 'actions', label: 'Actions' }
   ],
   fields: [
     { key: 'owner_id', label: 'Owner ID', type: 'number', required: true },
-    { key: 'name', label: 'Pet Name', type: 'text', required: true },
+    { key: 'patient_name', label: 'Pet Name', type: 'text', required: true },
     { key: 'species', label: 'Species', type: 'text', required: true },
     { key: 'breed', label: 'Breed', type: 'text' },
     { key: 'sex', label: 'Sex', type: 'text' },
@@ -93,7 +93,7 @@ prescriptions:{
   owners:{
   columns: [
     { key: 'owner_id', label: 'ID' },
-    { key: 'name', label: 'Name' },
+    { key: 'owner_name', label: 'Name' },
     { key: 'phone', label: 'Phone' },
     { key: 'email', label: 'Email' },
     { key: 'address', label: 'Address' },
@@ -102,7 +102,7 @@ prescriptions:{
     { key: 'actions', label: 'Actions' }
   ],
   fields: [
-    { key: 'name', label: 'Name', type: 'text', required: true },
+    { key: 'owner_name', label: 'Name', type: 'text', required: true },
     { key: 'phone', label: 'Phone', type: 'text' },
     { key: 'email', label: 'Email', type: 'email' },
     { key: 'address', label: 'Address', type: 'text' },
@@ -116,14 +116,14 @@ prescriptions:{
     { key: 'visit_id', label: 'ID' },
     { key: 'patient_name', label: 'Pet' },
     { key: 'visit_date', label: 'Visit Date' },
-    { key: 'vet_name', label: 'Veterinarian' },  // Added Veterinarian name
+    { key: 'veterinarian_id', label: 'Veterinarian ID' },
+    { key: 'vet_name', label: 'Veterinarian' },  
     { key: 'actions', label: 'Actions' }
   ],
   fields: [
     { key: 'patient_id', label: 'Patient ID', type: 'number', required: true },
     { key: 'visit_date', label: 'Visit Date', type: 'date', required: true },
     { key: 'veterinarian_id', label: 'Veterinarian ID', type: 'number', required: true },
-    { key: 'vet_name', label: 'Veterinarian Name', type: 'text' },  // Added field for Veterinarian Name
     { key: 'reason', label: 'Reason for Visit', type: 'text' }
   ],
   endpoint: '/api/visits.php'
@@ -149,13 +149,13 @@ diagnoses:{
 medications:{
   columns: [
     { key: 'medication_id', label: 'ID' },
-    { key: 'name', label: 'Name' },
+    { key: 'med_name', label: 'Name' },
     { key: 'unit', label: 'Unit' },
     { key: 'stock', label: 'Stock' },
     { key: 'actions', label: 'Actions' }
   ],
   fields: [
-    { key: 'name', label: 'Medication Name', type: 'text', required: true },
+    { key: 'med_name', label: 'Medication Name', type: 'text', required: true },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'stock', label: 'Stock', type: 'number' }
   ],
