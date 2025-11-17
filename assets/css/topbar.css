@@ -1,14 +1,50 @@
 /* Topbar Styles */
+:root {
+  --topbar-height: 64px;
+  --sidebar-width: 220px;
+}
+
+
+/* ensure topbar sits above content and is fixed */
 .topbar {
-  background-color: #3E9E5B; /* Primary Green */
-  color: white;
-  padding: 10px 20px;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  z-index: 1000; /* Ensure it stays on top */
+  right: 0;
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 1000;
+  box-sizing: border-box;
 }
+
+
+/* brand/logo area shifted right to make room for the menu button */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 48px; /* leaves space for the toggle button */
+  font-weight: 700;
+}
+
+
+/* simple CSS logo (replace with image if you have one) */
+.brand .logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
 
 /* Brand Logo */
 .topbar .brand {
@@ -55,4 +91,105 @@ body {
 }
 
 
+/* place Toggle/Menu button on the top-left */
+#toggleSidebarBtn {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1100;
+}
 
+
+/* ...existing code... */
+
+/* layout variables */
+:root {
+  --topbar-height: 64px;
+  --menu-size: 40px;
+}
+
+/* topbar */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+  z-index: 1200;
+  background: var(--topbar-bg, #2e8b57);
+}
+
+/* Menu button (bigger, more visible) */
+#toggleSidebarBtn {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--menu-size);
+  height: var(--menu-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 1300;
+}
+
+/* hover / focus */
+#toggleSidebarBtn:hover {
+  transform: translateY(-50%) scale(1.04);
+  background: rgba(255,255,255,0.09);
+}
+#toggleSidebarBtn:focus {
+  outline: none;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+
+/* hide any pseudo elements creating artifacts */
+#toggleSidebarBtn::before,
+#toggleSidebarBtn::after {
+  display: none !important;
+}
+
+/* brand moved right so it doesn't overlap the menu */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: calc(var(--menu-size) + 24px);
+  font-weight: 700;
+  color: #fff;
+}
+
+/* small CSS logo; replace with an <img> if you have one */
+.brand .logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* ensure no overlapping visual artifacts */
+.topbar .brand,
+#toggleSidebarBtn {
+  backface-visibility: hidden;
+}

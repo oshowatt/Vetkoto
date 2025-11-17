@@ -1,0 +1,49 @@
+/* ...existing code ... */
+
+/* base button polish */
+.btn {
+  display:inline-block;
+  padding:8px 12px;
+  border-radius:10px;                 /* more rounded */
+  border:0;
+  cursor:pointer;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* primary (green) preserved */
+.btn.primary {
+  background:#2e8b57;
+  color:#fff;
+}
+
+/* Edit = yellow/orange */
+.btn.edit,
+.btn-warning {
+  background: #f0ad4e;
+  color: #2b2b2b;
+}
+
+/* Delete = red */
+.btn.delete,
+.btn.danger {
+  background: #d9534f;
+  color: #fff;
+}
+
+/* hover/focus animation */
+.btn:hover, .btn:focus {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  outline: none;
+}
+
+/* small action buttons in table */
+.table-wrap .btn {
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:.95rem;
+}
+
+/* ensure buttons inside modal footer align */
+.modal .modal-footer .btn { padding:8px 12px; }

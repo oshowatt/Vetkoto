@@ -45,4 +45,112 @@
 }
 
 
+/* ...existing code... */
+
+/* ...existing code... */
+
+:root {
+  --topbar-height: 64px;
+  --sidebar-width: 220px;
+}
+
+/* Fix menu button artefact + style sidebar items */
+
+/* MENU BUTTON: remove weird square and unwanted focus paint */
+#toggleSidebarBtn {
+  background: transparent;
+  border: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .14s ease, transform .12s ease, box-shadow .12s ease;
+}
+
+/* hide any pseudo element that might create the square */
+#toggleSidebarBtn::before,
+#toggleSidebarBtn::after {
+  display: none !important;
+}
+
+/* subtle hover for the menu button */
+#toggleSidebarBtn:hover {
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-2px);
+}
+
+/* remove heavy focus ring but keep accessible visible focus */
+#toggleSidebarBtn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+}
+
+/* SIDEBAR MENU ITEMS: rounded, elevated, animated on hover */
+aside#sidebar,
+aside.sidebar {
+  /* ensure no border/gap */
+  border-right: 0;
+}
+
+/* target typical link / button shapes in the sidebar */
+/* adapt selectors if your markup uses different class names */
+aside#sidebar .nav-link,
+aside#sidebar a,
+aside#sidebar button,
+aside#sidebar .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: transform .12s cubic-bezier(.2,.9,.2,1), background .12s ease, box-shadow .12s ease;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+}
+
+/* hover / focus state */
+aside#sidebar .nav-link:hover,
+aside#sidebar a:hover,
+aside#sidebar button:hover,
+aside#sidebar .menu-item:hover,
+aside#sidebar .nav-link:focus,
+aside#sidebar a:focus,
+aside#sidebar button:focus {
+  background: rgba(255,255,255,0.06); /* subtle highlight */
+  transform: translateX(6px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  outline: none;
+}
+
+/* icons inside items: consistent size */
+aside#sidebar .nav-link .icon,
+aside#sidebar a .icon,
+aside#sidebar button .icon,
+aside#sidebar .menu-item .icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.05));
+}
+
+/* active item style */
+aside#sidebar .nav-link.active,
+aside#sidebar a.active,
+aside#sidebar button.active {
+  background: rgba(255,255,255,0.08);
+  transform: none;
+}
+
+/* ensure the sidebar scrollbar sits visually inside (no white gap) */
+aside#sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
 

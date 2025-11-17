@@ -13,3 +13,109 @@
 </div>
 </section>
 <script>window.VetKotoUI?.hydrateEntitySection?.('visits');</script>
+
+<!-- CSV Import/Export tools-->
+
+<div class="csv-tools">
+  <button class="btn" id="visitsImportCsv">Import CSV</button>
+  <button class="btn" id="visitsExportCsv">Export CSV</button>
+  <input id="visitsCsvFile" type="file" accept=".csv" style="display:none" />
+  <pre id="visitsCsvPreview" style="white-space:pre-wrap; max-height:200px; overflow:auto;"></pre>
+</div>
+
+
+<script>
+  if (window.VetKotoUI && typeof window.VetKotoUI.hydrateEntitySection === 'function') {
+    window.VetKotoUI.hydrateEntitySection('visits');
+  }
+
+  const importBtn = document.getElementById('visitsImportCsv');
+  const csvInput = document.getElementById('visitsCsvFile');
+  const csvPreview = document.getElementById('visitsCsvPreview');
+
+  importBtn.addEventListener('click', () => csvInput.click());
+
+  // ...existing code...
+
+// OPEN file picker for Import Csv buttons (robust: creates a temp input if needed)
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('button[id$="ImportCsv"]');
+  if (!btn) return;
+  e.preventDefault(); e.stopPropagation();
+
+  // derive expected ids
+  const m = btn.id && btn.id.match(/^(.+)ImportCsv$/);
+  const prefix = m ? m[1] : (btn.dataset.entity || '').toString();
+  const inputId = prefix ? (prefix + 'CsvFile') : null;
+
+  let input = inputId ? document.getElementById(inputId) : null;
+
+  // if input is missing or not an <input type="file">, create a temporary one
+  if (!input || input.tagName !== 'INPUT' || input.type !== 'file') {
+    // create off-screen file input so browsers allow file picker
+    input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.style.position = 'fixed';
+    input.style.left = '-9999px';
+    input.style.width = '1px';
+    input.style.height = '1px';
+    input.id = inputId || ('tmpCsvFile_' + Math.random().toString(36).slice(2));
+    document.body.appendChild(input);
+
+    // let centralized change handler handle this input (it matches /CsvFile$/)
+    // remove the temp input after a short delay following change to avoid leaks
+    input.addEventListener('change', function _tmpCleanup() {
+      // keep the centralized handler to run first, then remove element
+      setTimeout(() => {
+        input.removeEventListener('change', _tmpCleanup);
+        if (input && input.parentNode) input.parentNode.removeChild(input);
+      }, 300);
+    }, { once: true });
+  }
+
+  // trigger the file picker; some browsers require input to be visible-ish, but off-screen works reliably
+  try {
+    input.click();
+  } catch (err) {
+    console.error('Failed to open file picker', err);
+  }
+}, true);
+
+// ...existing code...
+
+  csvInput.addEventListener('change', async () => {
+    const file = csvInput.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('csv_file', file);
+    try {
+      const res = await fetch('/php-tools/csv_to_json.php', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('Server error on CSV conversion');
+      const json = await res.json();
+      csvPreview.textContent = JSON.stringify(json, null, 2);
+      // optional: automatically create rows:
+      if (Array.isArray(json.data)) for (const r of json.data) await window.VetKotoAPI.create('ENTITY', r);
+    } catch (err) {
+      console.error('CSV import error (ENTITY)', err);
+      csvPreview.textContent = 'Error reading CSV via PHP: ' + (err.message || err);
+    }
+  });
+
+  const exportBtn = document.getElementById('ENTITYExportCsv');
+  exportBtn.addEventListener('click', async () => {
+    try {
+      const rows = await window.VetKotoAPI.list('ENTITY', { limit: 10000 });
+      if (!rows || rows.length === 0) { csvPreview.textContent = 'No data to export.'; return; }
+      const keys = Object.keys(rows[0]);
+      const csv = [keys.join(',')].concat(rows.map(r => keys.map(k => `"${String(r[k] ?? '').replace(/"/g,'""')}"`).join(','))).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'ENTITY_export.csv'; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed (ENTITY)', err);
+      csvPreview.textContent = 'Export failed: ' + (err?.message || err);
+    }
+  });
+</script>

@@ -1,17 +1,67 @@
 <section id="owners" class="card">
-<div class="toolbar">
-<h3 style="margin:0">Owners</h3>
-<input class="input" id="ownersSearch" placeholder="Search owner name or phone" />
-<div class="spacer"></div>
-<button class="btn" id="ownersImportCsv">Import CSV</button>
-<button class="btn" id="ownersExportCsv">Export CSV</button>
-<button class="btn primary" data-action="create">+ New Owner</button>
-</div>
-<div class="table-wrap">
-<table>
-<thead></thead>
-<tbody></tbody>
-</table>
-</div>
+  <div class="toolbar">
+    <h3 style="margin:0">Owners</h3>
+    <input class="input" id="ownersSearch" placeholder="Search owner name or phone" />
+    <div class="spacer"></div>
+    <button class="btn" id="ownersImportCsv">Import CSV</button>
+    <button class="btn" id="ownersExportCsv">Export CSV</button>
+    <button class="btn primary" data-action="create">+ New Owner</button>
+  </div>
+
+  <!-- hidden file input for CSV import -->
+  <input type="file" id="ownersCsvFile" accept=".csv" style="display:none" />
+
+  <!-- optional preview of CSV → JSON result -->
+  <pre id="ownersCsvPreview" style="margin-top:10px; background:#f5f5f5; padding:10px; max-height:200px; overflow:auto;"></pre>
+
+  <div class="table-wrap">
+    <table>
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </section>
-<script>window.VetKotoUI?.hydrateEntitySection?.('owners');</script>
+
+
+<script>
+  window.VetKotoUI?.hydrateEntitySection?.('owners');
+
+  const ownersImportBtn = document.getElementById('ownersImportCsv');
+  const ownersCsvInput = document.getElementById('ownersCsvFile');
+  const ownersCsvPreview = document.getElementById('ownersCsvPreview');
+
+  // when user clicks Import CSV, open file picker
+  ownersImportBtn.addEventListener('click', () => {
+    ownersCsvInput.click();
+  });
+
+  // when file is selected, send it to PHP for CSV → JSON
+  ownersCsvInput.addEventListener('change', async () => {
+    const file = ownersCsvInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('csv_file', file);
+
+    try {
+      const res = await fetch('/php-tools/csv_to_json.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const json = await res.json();
+
+      // simple preview of what PHP returned
+      ownersCsvPreview.textContent = JSON.stringify(json, null, 2);
+
+      // later if you want:
+      // here you can loop json.data and send to Supabase
+      // or call your existing JS that inserts owners
+    } catch (err) {
+      console.error('CSV import error', err);
+      ownersCsvPreview.textContent = 'Error reading CSV via PHP.';
+    }
+  });
+
+
+</script>

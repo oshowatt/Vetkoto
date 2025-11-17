@@ -1,0 +1,27 @@
+/* ...existing code... */
+aside#sidebar,
+aside.sidebar {
+  position: fixed;
+  top: var(--topbar-height);
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - var(--topbar-height)); /* full height under topbar */
+  box-sizing: border-box;
+  padding: 12px;
+  overflow-y: auto;                  /* <-- ensure vertical scrolling */
+  -webkit-overflow-scrolling: touch;
+  background: var(--sidebar-bg, #2e8b57);
+  z-index: 1000;                      /* above page content but below modals */
+  transition: transform .28s cubic-bezier(.2,.9,.2,1), box-shadow .2s ease;
+}
+
+/* visible scrollbar styling (optional) */
+aside#sidebar::-webkit-scrollbar { width: 10px; }
+aside#sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.14);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+aside#sidebar { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.14) transparent; }
+/* ...existing code... */

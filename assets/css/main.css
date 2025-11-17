@@ -1,0 +1,50 @@
+/* ...existing code... */
+
+/* layout variables (ensure these exist) */
+:root {
+  --sidebar-width: 220px;
+  --topbar-height: 64px;
+}
+
+/* MAIN: slide using transform (prevents width changes / stretching) */
+#app,
+main#app,
+.main,
+.content {
+  position: relative;
+  box-sizing: border-box;
+
+  /* Use transform to shift content — smoother and doesn't change width */
+  transform: translateX(var(--sidebar-width));
+  width: calc(100% - var(--sidebar-width));
+  padding-top: calc(var(--topbar-height) + 16px);
+
+  transition: transform .28s cubic-bezier(.2,.9,.2,1), width .28s cubic-bezier(.2,.9,.2,1);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* When sidebar is collapsed (class toggled by JS), move content back */
+body.sidebar-collapsed #app,
+body.sidebar-collapsed main#app,
+body.sidebar-collapsed .main,
+body.sidebar-collapsed .content {
+  transform: translateX(0);
+  width: 100%;
+}
+
+/* Prevent the whole page from getting a horizontal scrollbar when sliding */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Optional: ensure tables and wide elements don't overflow the sliding container */
+.main .table-wrap,
+.main .card,
+#app .table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+/* ...existing code... */
