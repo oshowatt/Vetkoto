@@ -1,9 +1,13 @@
+<<<<<<< HEAD
 // Complete ui.js — scoped form building, delegated handlers, CSV import fallback
 
+=======
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
 if (!window.VetKotoAPI) {
   console.warn('VetKotoAPI not ready. Ensure api.js loads before ui.js, and Supabase client is initialized.');
 }
 
+<<<<<<< HEAD
 const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
 const sidebar = document.getElementById('sidebar');
 
@@ -18,11 +22,17 @@ if (toggleSidebarBtn) {
 (function () {
   'use strict';
 
+=======
+
+(function () {
+  'use strict';
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
   const $  = (sel, ctx=document) => ctx.querySelector(sel);
   const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
   const schema = window.VetKotoSchema || {};
   const api    = window.VetKotoAPI;
 
+<<<<<<< HEAD
   // Foreign-key mapping for display labels
   const FK = {
     patients: { owner_id: { entity: 'owners', labelKey: 'owner_name' } },
@@ -46,6 +56,20 @@ if (toggleSidebarBtn) {
   function renderTableHeader(entity, table){
     const tr = document.createElement('tr');
     (schema[entity].columns || []).forEach(col => {
+=======
+  
+  const FK = {
+    patients: { owner_id: { entity: 'owners', labelKey: 'name' } },
+    visits:   { patient_id: { entity: 'patients', labelKey: 'name' }, veterinarian_id: { entity: 'veterinarians', labelKey: 'name' } },
+    prescriptions: { visit_id: { entity: 'visits', labelKey: 'visit_id' }, medication_id: { entity: 'medications', labelKey: 'name' } },
+    allergies: { patient_id: { entity: 'patients', labelKey: 'name' } },
+    vaccinations: { patient_id: { entity: 'patients', labelKey: 'name' } }
+  };
+
+  function renderTableHeader(entity, table){
+    const tr = document.createElement('tr');
+    schema[entity].columns.forEach(col => {
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
       const th = document.createElement('th'); th.textContent = col.label; tr.appendChild(th);
     });
     table.tHead.innerHTML = ''; table.tHead.appendChild(tr);
@@ -54,6 +78,7 @@ if (toggleSidebarBtn) {
   async function renderTableBody(entity, table, filter){
     const rows = await api.list(entity, { filter });
     const tbody = table.tBodies[0]; tbody.innerHTML = '';
+<<<<<<< HEAD
 
     async function resolveLabel(col, row) {
       if (row[col.key] != null && row[col.key] !== '') return row[col.key];
@@ -89,6 +114,27 @@ if (toggleSidebarBtn) {
   }
 
   async function buildFieldInput(entity, f, record, ctx=document) {
+=======
+    rows.forEach(row => {
+      const tr = document.createElement('tr');
+      schema[entity].columns.forEach(col => {
+        const td = document.createElement('td');
+        if (col.key === 'actions') {
+          td.innerHTML = `
+            <button class="btn" data-edit="${row[schema[entity].columns[0].key] || row.id}" data-entity="${entity}">Edit</button>
+            <button class="btn danger" data-del="${row[schema[entity].columns[0].key] || row.id}" data-entity="${entity}">Delete</button>
+          `;
+        } else {
+          td.textContent = row[col.key] ?? '';
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function buildFieldInput(entity, f, record) {
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
     const fkConfig = FK[entity]?.[f.key];
     if (fkConfig) {
       const sel = document.createElement('select');
@@ -108,11 +154,18 @@ if (toggleSidebarBtn) {
     }
   }
 
+<<<<<<< HEAD
   // ctx: element (modal or document) where form fields should be placed
   async function buildForm(ctx, entity, record = {}) {
     const wrap = ctx?.querySelector('#formFields') || $('#formFields');
     if (!wrap) return;
     wrap.innerHTML = '';
+=======
+  async function buildForm(entity, record = {}) {
+    const wrap = $('#formFields'); if (!wrap) return;
+    wrap.innerHTML = '';
+    // hidden PK for edit
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
     const pk = schema[entity]?.columns?.[0]?.key;
     if (record && pk && record[pk] != null) {
       const hid = document.createElement('input');
@@ -122,12 +175,17 @@ if (toggleSidebarBtn) {
     for (const f of schema[entity].fields) {
       const div = document.createElement('div'); div.className = 'field';
       const label = document.createElement('label'); label.textContent = f.label + (f.required ? ' *' : '');
+<<<<<<< HEAD
       const input = await buildFieldInput(entity, f, record, ctx);
+=======
+      const input = await buildFieldInput(entity, f, record);
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
       div.append(label, input); wrap.appendChild(div);
     }
   }
 
   async function openModal(entity, mode='create', id=null){
+<<<<<<< HEAD
     const modalIdCandidate = document.getElementById(entity + 'Modal');
     const modalEl = modalIdCandidate || document.querySelector('.modal');
 
@@ -162,13 +220,33 @@ if (toggleSidebarBtn) {
   }
 
   function closeModal(){ const el = $('#modalBackdrop') || document.querySelector('.modal'); if (el) { if (el.classList && el.classList.contains('modal')) { if (window.VetKotoModal) window.VetKotoModal.close(el); } else el.style.display = 'none'; } }
+=======
+    const titleEl = $('#modalTitle'); const formEl = $('#entityForm'); const delBtn = $('#deleteBtn'); const backdrop = $('#modalBackdrop');
+    const nice = s => s.replace(/\b\w/g, c => c.toUpperCase());
+    titleEl.textContent = `${mode === 'create' ? 'Create' : 'Update'} ${nice(entity)}`;
+    formEl.dataset.entity = entity; formEl.dataset.mode = mode;
+    if (delBtn) delBtn.hidden = mode !== 'edit';
+    const record = mode === 'edit' && id ? await api.get(entity, id) : {};
+    await buildForm(entity, record);
+    backdrop.style.display = 'flex';
+  }
+
+  function closeModal(){ $('#modalBackdrop').style.display = 'none'; }
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
 
   function hydrateEntitySection(entity){
     const root = document.getElementById(entity); if (!root) return;
     const table = root.querySelector('table');
     if (table) { if (!table.tHead) table.createTHead(); if (!table.tBodies[0]) table.createTBody(); renderTableHeader(entity, table); renderTableBody(entity, table); }
+<<<<<<< HEAD
     const createBtn = root.querySelector('[data-action="create"]');
     if (createBtn) createBtn.addEventListener('click', () => openModal(entity, 'create'));
+=======
+    // Create button
+    const createBtn = root.querySelector('[data-action="create"]');
+    if (createBtn) createBtn.addEventListener('click', () => openModal(entity, 'create'));
+    // Search (Owners & Patients wired; copy this pattern for others)
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
     const searchEl = root.querySelector('input[id$="Search"]');
     if (searchEl && table) {
       searchEl.addEventListener('input', (e) => {
@@ -181,6 +259,7 @@ if (toggleSidebarBtn) {
     }
   }
 
+<<<<<<< HEAD
   window.VetKotoUI = { $, $$, openModal, closeModal, hydrateEntitySection };
 
   // modal action delegation (reset/close)
@@ -204,10 +283,23 @@ if (toggleSidebarBtn) {
     e.preventDefault();
     const entity = form.dataset.entity;
     const mode = form.dataset.mode;
+=======
+  // expose UI helpers
+  window.VetKotoUI = { $, $$, openModal, closeModal, hydrateEntitySection };
+
+  // modal controls
+  $('#closeModal')?.addEventListener('click', closeModal);
+  $('#resetBtn')?.addEventListener('click', () => $('#entityForm')?.reset());
+
+  $('#entityForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.currentTarget; const entity = form.dataset.entity; const mode = form.dataset.mode;
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
     const payload = Object.fromEntries(new FormData(form).entries());
     try {
       const res = mode === 'create' ? await api.create(entity, payload) : await api.update(entity, payload);
       alert(`${mode.toUpperCase()} → ${entity}\n` + JSON.stringify(res, null, 2));
+<<<<<<< HEAD
       // close modal
       const anyModal = form.closest('.modal') || document.getElementById(entity + 'Modal') || document.querySelector('.modal');
       if (anyModal && window.VetKotoModal && typeof window.VetKotoModal.close === 'function') {
@@ -215,6 +307,9 @@ if (toggleSidebarBtn) {
       } else {
         closeModal();
       }
+=======
+      closeModal();
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
       const table = document.querySelector(`#${entity} table`);
       if (table) renderTableBody(entity, table);
     } catch (err) {
@@ -223,6 +318,7 @@ if (toggleSidebarBtn) {
     }
   });
 
+<<<<<<< HEAD
   // simple CSV parser fallback
   function parseCsvToJson(csvText) {
     if (!csvText) return [];
@@ -273,11 +369,27 @@ if (toggleSidebarBtn) {
           alert(`Deleted ${delBtn.dataset.entity} id=${delBtn.dataset.del}`);
           const table = document.querySelector(`#${delBtn.dataset.entity} table`);
           if (table) renderTableBody(delBtn.dataset.entity, table);
+=======
+  // edit/delete delegation
+  document.body.addEventListener('click', async (e) => {
+    const t = e.target;
+    if (t.matches?.('[data-edit]')) {
+      openModal(t.dataset.entity, 'edit', t.dataset.edit);
+    }
+    if (t.matches?.('[data-del]')) {
+      if (confirm('Delete this record?')) {
+        try {
+          await api.remove(t.dataset.entity, t.dataset.del);
+          alert(`Deleted ${t.dataset.entity} id=${t.dataset.del}`);
+          const table = document.querySelector(`#${t.dataset.entity} table`);
+          if (table) renderTableBody(t.dataset.entity, table);
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
         } catch (err) {
           alert('Error: ' + (err?.message || err));
           console.error(err);
         }
       }
+<<<<<<< HEAD
       return;
     }
 
@@ -393,3 +505,8 @@ if (closeModalBtn) {
 }
 
 
+=======
+    }
+  });
+})();
+>>>>>>> b1de008087a0e2cdcf1242bc3e1ddf6b3f88b2f5
