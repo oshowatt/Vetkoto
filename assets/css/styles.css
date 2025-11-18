@@ -1,23 +1,83 @@
+
 @import url('sidebar.css');
 @import url('topbar.css');
+@import url('button.css');
 @import url('modal.css');
+@import url('main.css');
+@import url('scroll.css');
+/* ...existing code... */
 
 
-/* Body padding to prevent content from hiding behind the navbar */
-body {
-  padding-top: 60px; /* Adjust this to the height of your topbar */
+
+
+/* fix: keep main content centered and only shift it by sidebar width */
+:root{
+  --sidebar-width: 220px;
+  --topbar-height: 64px;
+  --content-offset: 220px; /* default when sidebar is visible */
 }
 
-/* Style for the main content */
-.main-content {
-  padding: 20px;
+/* when collapsed, set offset to zero */
+body.sidebar-collapsed {
+  --content-offset: 0;
 }
 
-/* Main Content Area */
+/* main content wrapper: centered, constrained width, shifted by offset */
+#app,
+main#app,
+.main,
+.content {
+  position: relative;
+  box-sizing: border-box;
+
+  max-width: 1200px;                      /* limit content width so page doesn't stretch */
+  margin: calc(var(--topbar-height) + 16px) auto 40px; /* top spacing + centered */
+  padding: 0 22px;                        /* inner padding */
+  width: calc(100% - 48px);               /* allow responsive shrinking inside max-width */
+
+  /* shift using CSS variable (no width recalculation) */
+  transform: translateX(var(--content-offset));
+  transition: transform .28s cubic-bezier(.2,.9,.2,1);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* ensure when sidebar collapsed the content returns to center */
+body.sidebar-collapsed #app,
+body.sidebar-collapsed main#app,
+body.sidebar-collapsed .main,
+body.sidebar-collapsed .content {
+  transform: translateX(0);
+}
+
+/* keep no horizontal scrollbar while shifting */
+html, body {
+  overflow-x: hidden;
+}
+
+/* make wide elements scroll inside the content area */
+#app .table-wrap,
+.main .table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+/* make viewport height consistent and disable body scroll */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* prevents page-level scrolling */
+}
+
+/* main content area should scroll inside its own container if content overflows */
+main#app,
 .main {
-  margin-left: 0; /* Initially no margin */
-  padding: 20px;
-  transition: margin-left 0.3s ease; /* Smooth transition for content shift */
+  margin-left: var(--sidebar-width);
+  padding-top: calc(var(--topbar-height) + 16px);
+  height: calc(100vh - var(--topbar-height)); /* same available height */
+  overflow: auto; /* allow main content scrolling inside its area (optional) */
+  box-sizing: border-box;
 }
 
 .main.shift {
@@ -67,20 +127,47 @@ footer p {
   margin: 0;
 }
 
-/* Button Styles */
+/* ...existing code... */
+
+/* Base button styling */
 .btn {
-  background-color: #3E9E5B; /* Primary Green */
-  color: #FFFFFF; /* White text */
-  padding: 10px 20px;
-  border: none;
-  border-radius: 10px;
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 8px;            /* more rounded */
+  border: 0;
+  background: #2e7d32;           /* adapt to your green */
+  color: #fff;
   cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.06);
 }
 
-.btn:hover {
-  background-color: #8AC27E; /* Lighter Green on hover */
+/* secondary / ghost variants keep their look but gain hover animation */
+.btn.ghost {
+  background: transparent;
+  color: inherit;
+  border-radius: 8px;
+}
+
+/* hover / focus effects */
+.btn:hover,
+.btn:focus {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  outline: none;
+}
+
+/* small size buttons in table actions */
+.table-wrap .btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+/* active / pressed state */
+.btn:active {
+  transform: translateY(-1px) scale(.995);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
 /* Container for Section */
@@ -160,4 +247,14 @@ button[type="submit"], button[type="reset"] {
 button[type="submit"]:hover, button[type="reset"]:hover {
   background-color: #8AC27E; /* Lighter Green on hover */
 }
+
+
+/* Shift the table to the right when modal is opened */
+.table-wrap.shift-right {
+  margin-left: 300px; /* Move the table by the width of the modal */
+  transition: margin-left 0.5s ease-out;
+}
+
+
+
 

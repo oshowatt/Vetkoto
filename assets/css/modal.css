@@ -1,42 +1,158 @@
-/* Modal Background */
-#modalBackground {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: none;
-  justify-content: center;
-  align-items: center;
+/* Ensure modal-content sits above overlay and inputs are interactive */
+:root {
+  --modal-zbase: 99980;
 }
 
-/* Modal Content */
-.modal-content {
-  background-color: #FFFFFF;
-  border-radius: 10px;
-  padding: 30px;
-  max-width: 600px;
-  width: 100%;
-}
-
-/* Modal Styles */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: none;
-  justify-content: center;
-  align-items: center;
-}
-
+/* Modal container */
 .modal {
-  background-color: white;
+  position: fixed;
+  top: 80px; /* Adjust this to create more space and avoid overlap with the top bar */
+  left: 250px; /* Adjust to match the sidebar width */
+  width: 400px; /* Adjust width based on your design */
+  height: auto;
+  max-height: 80%; /* Prevent overflow */
+  background: white;
+  z-index: 999;
   padding: 20px;
-  border-radius: 8px;
-  width: 80%;
-  max-width: 500px;
+  box-sizing: border-box;
+  /* allow absolute children like the close button to overflow the container and be clickable */
+  overflow: visible; /* changed from overflow-y: auto */
+  animation: slide-in-left 0.5s ease-out; /* Smooth sliding animation */
+  border-radius: 8px; /* Rounded corners */
+
+  /* subtle outer border and drop shadow to lift the tab off the page */
+  border: 1px solid rgba(16,24,32,0.06); /* light border */
+  box-shadow: 0 8px 24px rgba(12,20,30,0.08), 0 2px 6px rgba(12,20,30,0.04);
 }
+
+
+/* Slide-in animation */
+@keyframes slide-in-left {
+  from {
+    left: -100%;
+  }
+  to {
+    left: 250px; /* Final position beside sidebar */
+  }
+}
+
+/* Modal Close Button */
+.modal .modal-content .close-btn {
+  position: absolute;
+  top: 10px;   /* distance from the top edge of the modal content */
+  right: 10px; /* distance from the right edge of the modal content */
+  background: none;
+  border: none;
+  font-size: 20px;               /* slightly smaller to fit inside header */
+  color: #333;
+  cursor: pointer;
+  z-index: calc(var(--modal-zbase) + 90) !important; /* ensure above modal-content */
+  padding: 6px;                  /* small hit area */
+  line-height: 1;
+  border-radius: 4px;
+}
+
+/* Hover state (keeps consistent selector) */
+.modal .modal-content .close-btn:hover {
+  color: #d9534f;
+  background: rgba(0,0,0,0.03);
+}
+
+/* Remove/override previous rule that targeted .modal .close-btn (if present) */
+.modal .close-btn { 
+  /* keep as fallback but ensure it doesn't conflict */
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  z-index: auto !important;
+}
+
+/* When visible: use block so absolute positioning inside works predictably */
+.modal.open,
+.modal[aria-hidden="false"] {
+  display: block; /* changed from flex to block */
+  pointer-events: auto !important;
+}
+
+/* Move scrolling into modal-content so the container doesn't clip the close btn */
+.modal .modal-content,
+.modal-content {
+  position: relative;
+  z-index: calc(var(--modal-zbase) + 60) !important; /* HIGHER than overlay */
+  pointer-events: auto !important;
+  background: #fff !important;
+  max-width: 680px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 18px 22px;
+  border-radius: 8px;
+
+  /* allow internal scrolling when content overflows */
+  max-height: 80vh;
+  overflow-y: auto;
+
+  /* stronger panel border + soft inner shadow for the input tab */
+  border: 1px solid rgba(16,24,32,0.08);
+  box-shadow: 0 7px 21px rgba(12,20,30,0.10);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+/* lift effect when interacting */
+.modal .modal-content:hover,
+.modal .modal-content:focus-within {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(12,20,30,0.14);
+}
+
+/* Close button: target both placements (inside modal-content and fallback directly in .modal).
+   Use high specificity and !important to override external frameworks. */
+.modal .modal-content .close-btn,
+.modal > .close-btn {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  background: none !important;
+  border: none !important;
+  font-size: 20px !important;
+  color: #333 !important;
+  cursor: pointer !important;
+  z-index: calc(var(--modal-zbase) + 90) !important;
+  padding: 6px !important;
+  line-height: 1 !important;
+  border-radius: 4px !important;
+}
+
+/* Hover state */
+.modal .modal-content .close-btn:hover,
+.modal > .close-btn:hover {
+  color: #d9534f !important;
+  background: rgba(0,0,0,0.03) !important;
+}
+
+/* Safeguard: ensure modal children remain interactive */
+.modal * { pointer-events: auto !important; }
+
+/* Hide the Delete button */
+button.delete-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .modal {
+    width: 100%;
+    left: 0; /* Full width on smaller screens */
+    top: 0;
+    max-height: 100%; /* Allow the modal to occupy full height */
+  }
+
+  /* keep close button visible/clickable on mobile */
+  .modal .modal-content .close-btn,
+  .modal > .close-btn {
+    top: 8px !important;
+    right: 8px !important;
+    font-size: 22px !important;
+  }
+}
+
+/* Ensure buttons inside modal footer align */
+.modal .modal-footer .btn { padding:8px 12px; }

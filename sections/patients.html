@@ -2,7 +2,14 @@
 <div class="toolbar">
 <h3 style="margin:0">Patients</h3>
 <input class="input" id="patientsSearch" placeholder="Search pet, microchip, owner" />
-<div class="spacer"></div>
+<div class="spacer">
+</div>
+<div class="csv-tools">
+  <button class="btn" id="patientsImportCsv">Import CSV</button>
+  <button class="btn" id="patientsExportCsv">Export CSV</button>
+  <input id="visitsCsvFile" type="file" accept=".csv" style="display:none" />
+  <pre id="visitsCsvPreview" style="white-space:pre-wrap; max-height:200px; overflow:auto;"></pre>
+</div>
 <button class="btn primary" data-action="create">+ New Patient</button>
 </div>
 <div class="table-wrap">
@@ -13,3 +20,55 @@
 </div>
 </section>
 <script>window.VetKotoUI?.hydrateEntitySection?.('patients');</script>
+
+<!-- CSV Import/Export tools (place inside the section, above the table) -->
+
+
+
+
+<script>
+  if (window.VetKotoUI && typeof window.VetKotoUI.hydrateEntitySection === 'function') {
+    window.VetKotoUI.hydrateEntitySection('ENTITY');
+  }
+
+  const importBtn = document.getElementById('ENTITYImportCsv');
+  const csvInput = document.getElementById('ENTITYCsvFile');
+  const csvPreview = document.getElementById('ENTITYCsvPreview');
+
+  importBtn.addEventListener('click', () => csvInput.click());
+
+  csvInput.addEventListener('change', async () => {
+    const file = csvInput.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('csv_file', file);
+    try {
+      const res = await fetch('/php-tools/csv_to_json.php', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('Server error on CSV conversion');
+      const json = await res.json();
+      csvPreview.textContent = JSON.stringify(json, null, 2);
+      // optional: automatically create rows:
+      if (Array.isArray(json.data)) for (const r of json.data) await window.VetKotoAPI.create('ENTITY', r);
+    } catch (err) {
+      console.error('CSV import error (ENTITY)', err);
+      csvPreview.textContent = 'Error reading CSV via PHP: ' + (err.message || err);
+    }
+  });
+
+  const exportBtn = document.getElementById('ENTITYExportCsv');
+  exportBtn.addEventListener('click', async () => {
+    try {
+      const rows = await window.VetKotoAPI.list('ENTITY', { limit: 10000 });
+      if (!rows || rows.length === 0) { csvPreview.textContent = 'No data to export.'; return; }
+      const keys = Object.keys(rows[0]);
+      const csv = [keys.join(',')].concat(rows.map(r => keys.map(k => `"${String(r[k] ?? '').replace(/"/g,'""')}"`).join(','))).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'ENTITY_export.csv'; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed (ENTITY)', err);
+      csvPreview.textContent = 'Export failed: ' + (err?.message || err);
+    }
+  });
+</script>
