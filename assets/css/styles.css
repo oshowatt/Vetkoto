@@ -52,8 +52,10 @@ body.sidebar-collapsed .content {
 
 /* keep no horizontal scrollbar while shifting */
 html, body {
-  overflow-x: hidden;
+  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow-y: auto;   /* Allow vertical scrolling */
 }
+
 
 /* make wide elements scroll inside the content area */
 #app .table-wrap,
@@ -68,6 +70,10 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden; /* prevents page-level scrolling */
+}
+
+.main {
+  overflow-y: auto; /* Allow vertical scroll */
 }
 
 /* main content area should scroll inside its own container if content overflows */
@@ -254,6 +260,16 @@ button[type="submit"]:hover, button[type="reset"]:hover {
   margin-left: 300px; /* Move the table by the width of the modal */
   transition: margin-left 0.5s ease-out;
 }
+
+
+.table-wrap {
+  max-width: 100%;
+  max-height: 400px;
+  overflow-x: auto; /* Horizontal scroll for large tables */
+  overflow-y: auto; /* Vertical scroll if table height exceeds available space */
+  box-sizing: border-box;
+}
+
 
 
 

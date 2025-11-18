@@ -48,3 +48,41 @@ html, body {
 }
 
 /* ...existing code... */
+
+#app {
+  width: calc(100% - var(--sidebar-width));
+  padding-top: calc(var(--topbar-height) + 16px);
+  transition: transform 0.28s cubic-bezier(.2, .9, .2, 1), width 0.28s cubic-bezier(.2, .9, .2, 1);
+  overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: hidden; /* Prevent vertical overflow */
+}
+
+
+@media (max-width: 768px) {
+  #app {
+    width: 100%; /* Make the content area take full width on smaller screens */
+    transform: translateX(0); /* Reset translate if sidebar is collapsed */
+  }
+
+  .table-wrap {
+    overflow-x: auto; /* Ensure tables scroll horizontally if they exceed screen width */
+  }
+}
+
+#app, .main {
+  height: calc(100vh - var(--topbar-height)); /* Ensure the height is adjusted for topbar */
+  overflow-y: auto; /* Allow vertical scrolling */
+  box-sizing: border-box;
+}
+     
+#app {
+  height: calc(100vh - var(--topbar-height)); /* Adjust for topbar height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  box-sizing: border-box;
+}
+
+.main {
+  height: calc(100vh - var(--topbar-height)); /* Full height minus topbar */
+  overflow-y: auto; /* Allow scrolling */
+}
+/* SIDEBAR: item hover/active styles */

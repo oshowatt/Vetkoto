@@ -156,3 +156,47 @@ button.delete-btn {
 
 /* Ensure buttons inside modal footer align */
 .modal .modal-footer .btn { padding:8px 12px; }
+
+@media (max-width: 768px) {
+  .modal {
+    width: 100%;
+    left: 0;
+    top: 0;
+    max-height: 100%;
+  }
+
+  .modal .modal-content {
+    padding: 18px 22px;
+    max-height: 80vh;
+  }
+
+  .btn {
+    width: 100%; /* Make buttons full-width on smaller screens */
+  
+
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.open {
+    left: 0; /* Show sidebar when open */
+  }
+
+#app {
+    width: 100%;
+    transform: translateX(0); /* Ensure content takes full width */
+  }
+
+
+}
+
+.modal .modal-content {
+  max-height: 80vh; /* Limit modal height */
+  overflow-y: auto; /* Add vertical scroll if content exceeds max-height */
+}
+/* Ensure tables inside main content are responsive */
+.main .table-wrap,
+#app .table-wrap {
+  max-width: 100%;
+  overflow-x: auto; /* Add horizontal scrollbar for large tables */
+  box-sizing: border-box;
+} 

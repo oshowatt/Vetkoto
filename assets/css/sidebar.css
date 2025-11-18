@@ -154,3 +154,30 @@ aside#sidebar::-webkit-scrollbar-thumb {
   background-clip: padding-box;
 }
 
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px; /* Reduce sidebar width on smaller screens */
+    left: -220px; /* Hide sidebar */
+  }
+
+  body.sidebar-collapsed #app {
+    margin-left: 0; /* Adjust content margin to take up full width */
+  }
+
+  .topbar {
+    font-size: 16px;
+    padding: 10px;
+  }
+  #toggleSidebarBtn {
+    padding: 6px 8px;
+  }
+  #app {
+    width: 100%;
+    overflow-x: auto; /* Allow horizontal scrolling when sidebar is collapsed */
+  }
+
+
+
+}
+
+
