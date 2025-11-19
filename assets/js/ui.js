@@ -226,28 +226,51 @@
     }
   }
 
-  function hydrateEntitySection(entity) {
-    const root = document.getElementById(entity); if (!root) return;
-    const table = root.querySelector('table');
-    if (table) {
-      if (!table.tHead) table.createTHead();
-      if (!table.tBodies[0]) table.createTBody();
-      renderTableHeader(entity, table);
-      renderTableBody(entity, table);
-    }
-    const createBtn = root.querySelector('[data-action="create"]');
-    if (createBtn) createBtn.addEventListener('click', () => openModal(entity, 'create'));
-    const searchEl = root.querySelector('input[id$="Search"]');
-    if (searchEl && table) {
-      searchEl.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        const firstTextCol = (schema[entity]?.columns || []).find(c => c.key !== 'actions' && c.key !== schema[entity].columns[0].key);
-        const col = (entity === 'owners') ? 'name' : (entity === 'patients' ? 'name' : (firstTextCol?.key || schema[entity].columns[1].key));
-        const filter = query ? { column: col, value: query } : undefined;
-        renderTableBody(entity, table, filter);
-      });
-    }
+function hydrateEntitySection(entity) {
+  const root = document.getElementById(entity); 
+  if (!root) return;
+
+  const table = root.querySelector('table');
+  if (table) {
+    if (!table.tHead) table.createTHead();
+    if (!table.tBodies[0]) table.createTBody();
+    renderTableHeader(entity, table);
+    renderTableBody(entity, table);
   }
+
+  const createBtn = root.querySelector('[data-action="create"]');
+  if (createBtn) createBtn.addEventListener('click', () => openModal(entity, 'create'));
+
+  const searchEl = root.querySelector('input[id$="Search"]');
+if (searchEl && table) {
+  searchEl.addEventListener('input', async (e) => {
+    const query = e.target.value.trim();
+    
+    // Dynamically determine the column to filter based on the schema for the given entity
+    const firstTextCol = (schema[entity]?.columns || []).find(c => c.key !== 'actions' && c.key !== schema[entity].columns[0].key);
+    
+    // Custom column mapping logic for visits (or other entities that need to search patient_name)
+    let col;
+    if (entity === 'visits') {
+      col = 'patients.patient_name'; // Search patient_name in the patients table for visits
+    } else {
+      col = firstTextCol?.key || schema[entity].columns[1]?.key;
+    }
+    
+    // Apply the filter if there's a query
+    const filter = query ? { column: col, value: query } : undefined;
+
+    // Modify the query to ensure the correct "patients" table is joined for visits
+    const rows = await api.list(entity, { filter });
+
+    // Call renderTableBody to update the table with the filtered rows
+    renderTableBody(entity, table, filter);
+  });
+}
+
+
+}
+
 
   // Expose minimal helpers
   window.VetKotoUI = { $, $$, openModal, closeModal, hydrateEntitySection };
@@ -299,6 +322,21 @@
     // wire simple close/reset controls if present
     $('#closeModal')?.addEventListener('click', closeModal);
     $('#resetBtn')?.addEventListener('click', () => $('#entityForm')?.reset());
+  });
+
+})();
+
+// ui.js
+
+(function () {
+  'use strict';
+
+  // Initialize search functionality for specific entities
+  document.addEventListener('DOMContentLoaded', () => {
+    // Use the setupSearch from search.js
+    VetKotoSearch.setupSearch('owners');  // for Owners section
+    VetKotoSearch.setupSearch('patients'); // for Patients section
+    
   });
 
 })();

@@ -16,16 +16,36 @@
 
   function metaOf(entity){ const m = ENTITIES[entity]; if(!m) throw new Error(`Unknown ${entity}`); return m; }
 
-  async function list(entity, { limit=100, offset=0, orderBy, asc=true, filter } = {}) {
-    const { list:src, pk } = metaOf(entity);
-    let q = sb.from(src).select('*');
-    // very simple filter: { column, ilike }
-    if (filter?.column && filter?.value) q = q.ilike(filter.column, `%${filter.value}%`);
-    q = q.order(orderBy || pk, { ascending: asc }).range(offset, offset + limit - 1);
-    const { data, error } = await q;
-    if (error) throw error;
-    return data || [];
+  async function list(entity, { limit = 100, offset = 0, orderBy, asc = true, filter } = {}) {
+  const { list: src, pk } = metaOf(entity);
+  let q = sb.from(src).select('*'); // Start the query for the entity
+
+  // Apply the filter if there's a column and value
+  if (filter?.column && filter?.value) {
+    // Check if the filter includes a relation like 'patients.patient_name'
+    if (filter.column.includes('.')) {
+      const [table, column] = filter.column.split('.');
+      
+      // Assuming the foreign key for visits to patients is patient_id, we select from both
+      // Explicitly selecting columns from both visits and patients table
+      q = q.select(`${src}.*, ${table}.${column}`) // Select both from visits and related patients
+        .ilike(`${table}.${column}`, `%${filter.value}%`);
+    } else {
+      q = q.ilike(filter.column, `%${filter.value}%`);
+    }
   }
+
+  // Apply the ordering and limit
+  q = q.order(orderBy || pk, { ascending: asc }).range(offset, offset + limit - 1);
+
+  // Execute the query
+  const { data, error } = await q;
+  
+  if (error) throw error;
+  
+  return data || [];
+}
+
 
   async function get(entity, id) {
     const { table, pk } = metaOf(entity);
