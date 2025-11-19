@@ -3,7 +3,7 @@
   position: fixed;
   top: 60px; /* Adjust to the height of your topbar */
   left: -250px; /* Initially hidden */
-  width: 250px; /* Sidebar width */
+  width: 300px; /* Sidebar width */
   height: calc(100% - 60px); /* Full height minus the topbar */
   background-color: #3E9E5B; /* Green color */
   transition: left 0.3s ease; /* Smooth transition */

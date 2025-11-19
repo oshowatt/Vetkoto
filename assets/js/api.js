@@ -22,18 +22,15 @@
 
   // Apply the filter if there's a column and value
   if (filter?.column && filter?.value) {
-    // Check if the filter includes a relation like 'patients.patient_name'
-    if (filter.column.includes('.')) {
-      const [table, column] = filter.column.split('.');
-      
-      // Assuming the foreign key for visits to patients is patient_id, we select from both
-      // Explicitly selecting columns from both visits and patients table
-      q = q.select(`${src}.*, ${table}.${column}`) // Select both from visits and related patients
-        .ilike(`${table}.${column}`, `%${filter.value}%`);
-    } else {
-      q = q.ilike(filter.column, `%${filter.value}%`);
-    }
+  if (filter.column.includes('.')) {
+    const [table, column] = filter.column.split('.');
+    q = q.select(`${src}.*, ${table}.${column}`) // Join visits and patients to get patient_name
+      .ilike(`${table}.${column}`, `%${filter.value}%`);
+  } else {
+    q = q.ilike(filter.column, `%${filter.value}%`);
   }
+}
+
 
   // Apply the ordering and limit
   q = q.order(orderBy || pk, { ascending: asc }).range(offset, offset + limit - 1);

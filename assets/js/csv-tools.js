@@ -10,7 +10,73 @@
   }
 
   // open file picker when Import button clicked (supports legacy ID pattern)
-  // ...existing code...
+ // Trigger the file input when the import button is clicked
+(function () {
+  // Helper to trigger file input when Import button is clicked
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('button[id$="ImportCsv"]');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const { inputId } = idsFromButtonId(btn.id);
+    const fileInput = document.getElementById(inputId);
+    if (fileInput) fileInput.click(); // Simulate a click to open file picker
+  }, true);
+
+
+  // Handle CSV file selection and import
+document.addEventListener('change', async function(e) {
+  const input = e.target;
+  if (!(input && input.tagName === 'INPUT' && input.type === 'file' && /CsvFile$/.test(input.id))) return;
+  const file = input.files && input.files[0];
+  const prefix = input.id.replace(/CsvFile$/, '');
+  const preview = document.getElementById(prefix + 'CsvPreview');
+
+  if (!file) {
+    if (preview) preview.textContent = 'No file selected.';
+    return;
+  }
+
+  if (preview) preview.textContent = 'Uploading CSV for conversion...';
+
+  const form = new FormData();
+  form.append('csv_file', file);
+
+  try {
+    const res = await fetch('/php-tools/csv_to_json.php', { method: 'POST', body: form });
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    const json = await res.json();
+    
+    // Remove ID fields from each entry before sending to database
+    if (json.data) {
+      json.data.forEach(record => {
+        delete record.owner_id; // remove owner_id for owners
+        delete record.patient_id; // remove patient_id for patients
+        // add more as necessary
+      });
+    }
+
+    if (preview) preview.textContent = JSON.stringify(json, null, 2);
+
+    // Now send data to the database without the IDs
+    for (const r of json.data) {
+      try {
+        await window.VetKotoAPI.create(prefix.replace(/s$/, ''), r);
+      } catch (_) {}
+    }
+
+  } catch (err) {
+    console.error('CSV import error for', input.id, err);
+    if (preview) preview.textContent = 'CSV import error: ' + (err.message || err);
+  } finally {
+    input.value = ''; // clear file input after import
+  }
+}, true); 
+
+})();
+
+
 document.addEventListener('click', async function(e){
   const btn = e.target.closest('button[id$="ExportCsv"]');
   if (!btn) return;
@@ -70,43 +136,54 @@ document.addEventListener('click', async function(e){
 }, true);
 
 
-  // handle file selection for any input whose id endsWith "CsvFile"
-  document.addEventListener('change', async function(e){
-    const input = e.target;
-    if (!(input && input.tagName === 'INPUT' && input.type === 'file' && /CsvFile$/.test(input.id))) return;
-    const file = input.files && input.files[0];
-    const prefix = input.id.replace(/CsvFile$/, '');
-    const preview = document.getElementById(prefix + 'CsvPreview');
+  document.addEventListener('change', async function(e) {
+  const input = e.target;
+  if (!(input && input.tagName === 'INPUT' && input.type === 'file' && /CsvFile$/.test(input.id))) return;
+  const file = input.files && input.files[0];
+  const prefix = input.id.replace(/CsvFile$/, '');
+  const preview = document.getElementById(prefix + 'CsvPreview');
 
-    if (!file) {
-      if (preview) preview.textContent = 'No file selected.';
-      return;
+  if (!file) {
+    if (preview) preview.textContent = 'No file selected.';
+    return;
+  }
+
+  if (preview) preview.textContent = 'Uploading CSV for conversion...';
+
+  const form = new FormData();
+  form.append('csv_file', file);
+
+  try {
+    const res = await fetch('/php-tools/csv_to_json.php', { method: 'POST', body: form });
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    const json = await res.json();
+    
+    // Remove ID fields from each entry before sending to database
+    if (json.data) {
+      json.data.forEach(record => {
+        delete record.owner_id; // remove owner_id for owners
+        delete record.patient_id; // remove patient_id for patients
+        // add more as necessary
+      });
     }
 
-    if (preview) preview.textContent = 'Uploading CSV for conversion...';
+    if (preview) preview.textContent = JSON.stringify(json, null, 2);
 
-    const form = new FormData();
-    form.append('csv_file', file);
-
-    try {
-      const res = await fetch('/php-tools/csv_to_json.php', { method: 'POST', body: form });
-      if (!res.ok) throw new Error('Server returned ' + res.status);
-      const json = await res.json();
-      if (preview) preview.textContent = JSON.stringify(json, null, 2);
-      // optionally: create records automatically (uncomment and ensure window.VetKotoAPI exists)
-      // if (Array.isArray(json.data)) {
-      //   for (const r of json.data) {
-      //     try { await window.VetKotoAPI.create(prefix.replace(/s$/,''), r); } catch(_) {}
-      //   }
-      // }
-    } catch (err) {
-      console.error('CSV import error for', input.id, err);
-      if (preview) preview.textContent = 'CSV import error: ' + (err.message || err);
-    } finally {
-      // clear value so same file can be re-selected later
-      input.value = '';
+    // Now send data to the database without the IDs
+    for (const r of json.data) {
+      try {
+        await window.VetKotoAPI.create(prefix.replace(/s$/, ''), r);
+      } catch (_) {}
     }
-  }, true);
+
+  } catch (err) {
+    console.error('CSV import error for', input.id, err);
+    if (preview) preview.textContent = 'CSV import error: ' + (err.message || err);
+  } finally {
+    input.value = ''; // clear file input after import
+  }
+}, true);
+
 
   // Export buttons: click handler for buttons with id ending "ExportCsv"
   document.addEventListener('click', async function(e){
@@ -142,3 +219,5 @@ document.addEventListener('click', async function(e){
   }, true);
 
 })();
+
+
