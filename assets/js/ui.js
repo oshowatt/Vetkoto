@@ -371,7 +371,13 @@ if (searchEl && table) {
     // Use the setupSearch from search.js
     VetKotoSearch.setupSearch('owners');  // for Owners section
     VetKotoSearch.setupSearch('patients'); // for Patients section
-    
+    VetKotoSearch.setupSearch('visits');
+    VetKotoSearch.setupSearch('diagnoses');
+    VetKotoSearch.setupSearch('medications');
+    VetKotoSearch.setupSearch('prescriptions');
+    VetKotoSearch.setupSearch('allergies');
+    VetKotoSearch.setupSearch('vaccinations');
+    VetKotoSearch.setupSearch('veterinarians');
   });
 
 })();

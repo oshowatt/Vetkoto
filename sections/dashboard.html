@@ -1,8 +1,47 @@
-
 <section id="dashboard" class="card">
-<div class="toolbar">
-<h2 style="margin:0">Welcome to VetKoto</h2>
-<div class="spacer"></div>
-<button class="btn" onclick="location.reload()">Refresh</button>
-</div>
+  <div class="toolbar">
+    <h2> 🐾 Welcome to VetKoto 🐾</h2>
+    <div class="spacer"></div>
+    <button class="btn" onclick="location.reload()">Refresh</button>
+  </div>
+
+  <div class="dashboard-content">
+    <!-- System Stats Section -->
+    <div class="stats">
+      <div class="stat-card">
+        <h3>Total Owners</h3>
+        <p id="totalOwners">Loading...</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Patients</h3>
+        <p id="totalPatients">Loading...</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Visits</h3>
+        <p id="totalVisits">Loading...</p>
+      </div>
+      <div class="stat-card">
+        <h3>Upcoming Vaccinations</h3>
+        <p id="upcomingVaccinations">Loading...</p>
+      </div>
+    </div>
+
+    <!-- Quick Access Links -->
+    <div class="quick-links">
+        <h3>Quick Access</h3>
+        <button class="btn" onclick="loadSection('owners')">Add New Owner</button>
+        <button class="btn" onclick="loadSection('patients')">Add New Patient</button>
+        <button class="btn" onclick="loadSection('visits')">Schedule Visit</button>
+    </div>
+
+
+
+    <!-- Recent Activity Section -->
+    <div class="recent-activity">
+      <h3>Recent Activity</h3>
+      <ul id="recentActivity">
+        <li>Loading...</li>
+      </ul>
+    </div>
+  </div>
 </section>
