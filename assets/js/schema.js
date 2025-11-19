@@ -27,6 +27,7 @@ window.VetKotoSchema = {
       { key: 'owner_name', label: 'Owner' },
       { key: 'species', label: 'Species' },
       { key: 'breed', label: 'Breed' },
+      { key: 'microchip', label: 'Microchip' },
       { key: 'actions', label: 'Actions' }
     ],
     fields: [
@@ -60,6 +61,7 @@ window.VetKotoSchema = {
       { key: 'patient_name', label: 'Pet' },
       { key: 'visit_date', label: 'Visit Date' },
       { key: 'vet_name', label: 'Veterinarian' },
+      { key: 'reason', label: 'Reason for Visit' },
       { key: 'actions', label: 'Actions' }
     ],
     fields: [
@@ -74,9 +76,11 @@ window.VetKotoSchema = {
   diagnoses: {
     columns: [
       { key: 'diagnosis_id', label: 'ID' },
+      { key: 'visit_id', label: 'Visit ID' },
       { key: 'patient_name', label: 'Pet' },
       { key: 'description', label: 'Diagnosis' },
       { key: 'severity', label: 'Severity' },
+      { key: 'vet_name', label: 'Veterinarian' },
       { key: 'actions', label: 'Actions' }
     ],
     fields: [
@@ -107,10 +111,12 @@ window.VetKotoSchema = {
     columns: [
       { key: 'prescription_id', label: 'ID' },
       { key: 'visit_id', label: 'Visit' },
+      { key: 'patient_name', label: 'Patient Name' },
       { key: 'med_name', label: 'Medication' },
       { key: 'dose', label: 'Dose' },
       { key: 'frequency', label: 'Frequency' },
       { key: 'duration', label: 'Duration' },
+      { key: 'route', label: 'Route' },
       { key: 'actions', label: 'Actions' }
     ],
     fields: [

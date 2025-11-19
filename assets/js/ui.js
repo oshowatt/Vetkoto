@@ -16,10 +16,15 @@
     },
     prescriptions: {
       medication_id: { entity: 'medications', displayKey: 'med_name', labelKey: 'med_name' },
-      visit_id: { entity: 'visits', displayKey: 'visit_id', labelKey: 'visit_id' }
+      visit_id: { entity: 'visits', displayKey: 'visit_id', labelKey: 'visit_id' },
+      patient_id: { entity: 'patients', displayKey: 'patient_name', labelKey: 'patient_name' }
     },
     allergies: { patient_id: { entity: 'patients', displayKey: 'patient_name', labelKey: 'patient_name' } },
-    vaccinations: { patient_id: { entity: 'patients', displayKey: 'patient_name', labelKey: 'patient_name' } }
+    vaccinations: { patient_id: { entity: 'patients', displayKey: 'patient_name', labelKey: 'patient_name' } },
+    diagnoses: {
+      visit_id: { entity: 'visits', displayKey: 'vet_name', labelKey: 'vet_name' },
+      visit_id: { entity: 'visits', displayKey: 'visit_id', labelKey: 'visit_id' }
+    }
   };
 
   const _CACHE = new Map();
@@ -79,6 +84,36 @@
           }
         }
       }
+
+      // Special case for diagnoses: resolve veterinarian name via visit_id -> veterinarian_id -> vet_name
+if (entity === 'diagnoses' && col.key === 'vet_name') {
+  if (row.visit_id) {
+    try {
+      const visit = await api.get('visits', row.visit_id);
+      if (visit && visit.veterinarian_id) {
+        const vet = await cachedGet('veterinarians', visit.veterinarian_id);
+        if (vet && vet.vet_name) return vet.vet_name;
+      }
+    } catch (e) { /* ignore */ }
+  }
+  return '';
+}
+
+// Special case for prescriptions: resolve patient_name via visit_id -> patient_id -> patient_name
+if (entity === 'prescriptions' && col.key === 'patient_name') {
+  if (row.visit_id) {
+    try {
+      const visit = await api.get('visits', row.visit_id);
+      if (visit && visit.patient_id) {
+        const patient = await cachedGet('patients', visit.patient_id);
+        if (patient && patient.patient_name) return patient.patient_name;
+      }
+    } catch (e) { /* ignore */ }
+  }
+  return '';
+}
+
+
 
       // 3) Try any nested object that contains a common label/key
       for (const k of Object.keys(row)) {
