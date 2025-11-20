@@ -99,6 +99,20 @@ if (entity === 'diagnoses' && col.key === 'vet_name') {
   return '';
 }
 
+if (entity === 'diagnoses' && col.key === 'patient_name') {
+  if (row.visit_id) {
+    try {
+      const visit = await api.get('visits', row.visit_id);
+      if (visit && visit.patient_id) {
+        const patient = await cachedGet('patients', visit.patient_id);
+        if (patient && patient.patient_name) return patient.patient_name;
+      }
+    } catch (e) { /* ignore */ }
+  }
+  return '';
+}
+
+
 // Special case for prescriptions: resolve patient_name via visit_id -> patient_id -> patient_name
 if (entity === 'prescriptions' && col.key === 'patient_name') {
   if (row.visit_id) {
