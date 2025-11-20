@@ -261,6 +261,26 @@ if (entity === 'prescriptions' && col.key === 'patient_name') {
     }
   }
 
+  async function saveEntity(entity, mode = 'create', payload) {
+  try {
+    const res = mode === 'create' 
+      ? await api.create(entity, payload) 
+      : await api.update(entity, payload);
+
+    closeModal();
+    alert(`${entity.toUpperCase()} successfully ${mode === 'create' ? 'created' : 'updated'}`);
+
+    const table = document.querySelector(`#${entity} table`);
+    if (table) renderTableBody(entity, table);
+  } catch (err) {
+    console.error(err);
+    alert('Save failed: ' + (err?.message || err));
+  }
+}
+  
+
+  
+
 function hydrateEntitySection(entity) {
   const root = document.getElementById(entity); 
   if (!root) return;
@@ -279,28 +299,30 @@ function hydrateEntitySection(entity) {
   const searchEl = root.querySelector('input[id$="Search"]');
 if (searchEl && table) {
   searchEl.addEventListener('input', async (e) => {
-    const query = e.target.value.trim();
-    
-    // Dynamically determine the column to filter based on the schema for the given entity
-    const firstTextCol = (schema[entity]?.columns || []).find(c => c.key !== 'actions' && c.key !== schema[entity].columns[0].key);
-    
-    // Custom column mapping logic for visits (or other entities that need to search patient_name)
-    let col;
-    if (entity === 'visits') {
-      col = 'patients.patient_name'; // Search patient_name in the patients table for visits
-    } else {
-      col = firstTextCol?.key || schema[entity].columns[1]?.key;
-    }
-    
-    // Apply the filter if there's a query
-    const filter = query ? { column: col, value: query } : undefined;
+  const query = e.target.value.trim();
+  
+  // Dynamically determine the column to filter based on the schema for the given entity
+  const firstTextCol = (schema[entity]?.columns || []).find(c => c.key !== 'actions' && c.key !== schema[entity].columns[0].key);
+  let col;
+  
+  if (entity === 'visits') {
+    col = 'patients.patient_name'; // Search patient_name in the patients table for visits
+  } else {
+    col = firstTextCol?.key || schema[entity].columns[1]?.key;
+  }
 
+  const filter = query ? { column: col, value: query } : undefined;
+
+  try {
     // Modify the query to ensure the correct "patients" table is joined for visits
     const rows = await api.list(entity, { filter });
-
-    // Call renderTableBody to update the table with the filtered rows
     renderTableBody(entity, table, filter);
-  });
+  } catch (err) {
+    console.error('Search API error:', err);
+    alert('Error while searching: ' + (err.message || err));
+  }
+});
+
 }
 
 
@@ -329,24 +351,26 @@ if (searchEl && table) {
     // catch create buttons inside modal toolbar etc (handled above), CSV import buttons handled by csv-tools.js
   });
 
-  // form submit handling
-  document.addEventListener('submit', async (e) => {
-    const form = e.target;
-    if (!form || !form.matches('#entityForm')) return;
-    e.preventDefault();
-    const entity = form.dataset.entity;
-    const mode = form.dataset.mode;
-    const payload = Object.fromEntries(new FormData(form).entries());
-    try {
-      const res = mode === 'create' ? await api.create(entity, payload) : await api.update(entity, payload);
-      closeModal();
-      const table = document.querySelector(`#${entity} table`);
-      if (table) renderTableBody(entity, table);
-    } catch (err) {
-      console.error(err);
-      alert('Save failed: ' + (err?.message || err));
-    }
-  });
+ document.addEventListener('submit', async (e) => {
+  const form = e.target;
+  if (!form || !form.matches('#entityForm')) return;
+  e.preventDefault();
+  const entity = form.dataset.entity;
+  const mode = form.dataset.mode;
+  const payload = Object.fromEntries(new FormData(form).entries());
+
+  try {
+    // Call the new saveEntity function
+    await saveEntity(entity, mode, payload);  // <-- this is the new call
+
+    // Optionally reload table or do other actions
+    const table = document.querySelector(`#${entity} table`);
+    if (table) renderTableBody(entity, table);
+  } catch (err) {
+    console.error(err);
+    alert('Save failed: ' + (err?.message || err));
+  }
+});
 
   // auto-hydrate known schema sections when DOM ready
   document.addEventListener('DOMContentLoaded', () => {

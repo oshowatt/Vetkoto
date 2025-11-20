@@ -27,6 +27,7 @@ window.VetKotoSchema = {
       { key: 'owner_name', label: 'Owner' },
       { key: 'species', label: 'Species' },
       { key: 'breed', label: 'Breed' },
+      { key: 'sex', label: 'Sex' },
       { key: 'microchip', label: 'Microchip' },
       { key: 'actions', label: 'Actions' }
     ],
@@ -62,13 +63,15 @@ window.VetKotoSchema = {
       { key: 'visit_date', label: 'Visit Date' },
       { key: 'vet_name', label: 'Veterinarian' },
       { key: 'reason', label: 'Reason for Visit' },
+      {key: 'notes', label: 'Notes' },
       { key: 'actions', label: 'Actions' }
     ],
     fields: [
       { key: 'patient_id', label: 'Patient ID', type: 'number', required: true },
       { key: 'visit_date', label: 'Visit Date', type: 'date', required: true },
       { key: 'veterinarian_id', label: 'Veterinarian ID', type: 'number', required: true },
-      { key: 'reason', label: 'Reason for Visit', type: 'text' }
+      { key: 'reason', label: 'Reason for Visit', type: 'text' },
+      { key: 'notes', label: 'Notes', type: 'textarea' }
     ],
     endpoint: '/api/visits.php'
   },
@@ -81,6 +84,7 @@ window.VetKotoSchema = {
       { key: 'description', label: 'Diagnosis' },
       { key: 'severity', label: 'Severity' },
       { key: 'vet_name', label: 'Veterinarian' },
+      { key: 'diagnosis_date', label: 'Created At' },
       { key: 'actions', label: 'Actions' }
     ],
     fields: [
@@ -117,6 +121,7 @@ window.VetKotoSchema = {
       { key: 'frequency', label: 'Frequency' },
       { key: 'duration', label: 'Duration' },
       { key: 'route', label: 'Route' },
+      { key: 'prescription_date', label: 'Prescription Date'},
       { key: 'actions', label: 'Actions' }
     ],
     fields: [

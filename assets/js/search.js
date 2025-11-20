@@ -13,17 +13,18 @@
    * across all candidates if the server-side filter yields no results.
    */
   function getSearchColumns(entity) {
-    switch (entity) {
-      case 'owners': return ['owner_name', 'name', 'owner_id'];
-      case 'patients': return ['patient_name', 'patient_id', 'owner_name'];
-      case 'visits': return ['patients.patient_name', 'visit_date', 'visit_id'];
-      case 'medications': return ['med_name', 'medication_id'];
-      case 'vaccinations': return ['vaccine', 'vaccine_name', 'vaccination_id'];
-      case 'diagnoses': return ['description', 'diagnosis_id'];
-      case 'prescriptions': return ['med_name', 'medication_id', 'visit_id', 'dose']; // first item is preferred for server filter
-      default: return ['name'];
-    }
+  switch (entity) {
+    case 'owners': return ['owner_name', 'name', 'owner_id'];
+    case 'patients': return ['patient_name', 'patient_id', 'owner_name'];
+    case 'visits': return ['patients.patient_name', 'visit_date', 'visit_id']; // Ensure 'patients.patient_name' is included
+    case 'medications': return ['med_name', 'medication_id'];
+    case 'vaccinations': return ['vaccine', 'vaccine_name', 'vaccination_id'];
+    case 'diagnoses': return ['description', 'diagnosis_id', 'patients.patient_name'];
+    case 'prescriptions': return ['med_name', 'medication_id', 'visit_id', 'dose', 'patients.patient_name'];
+    default: return ['name'];
   }
+}
+
 
   function setupSearch(entity) {
     const root = document.getElementById(entity);

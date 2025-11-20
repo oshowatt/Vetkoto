@@ -8,7 +8,7 @@
     visits:         { list: 'visits',            table: 'visits',         pk: 'visit_id' },
     diagnoses:      { list: 'diagnoses',         table: 'diagnoses',      pk: 'diagnosis_id' },
     medications:    { list: 'medications',       table: 'medications',    pk: 'medication_id' },
-    prescriptions:  { list: 'prescriptions_view',table: 'prescriptions',  pk: 'prescription_id' },
+    prescriptions:  { list: 'prescriptions',     table: 'prescriptions',  pk: 'prescription_id' },
     allergies:      { list: 'allergies_view',    table: 'allergies',      pk: 'allergy_id' },
     vaccinations:   { list: 'vaccinations_view', table: 'vaccinations',   pk: 'vaccination_id' },
     veterinarians:  { list: 'veterinarians',     table: 'veterinarians',  pk: 'veterinarian_id' },
@@ -16,32 +16,53 @@
 
   function metaOf(entity){ const m = ENTITIES[entity]; if(!m) throw new Error(`Unknown ${entity}`); return m; }
 
-  async function list(entity, { limit = 100, offset = 0, orderBy, asc = true, filter } = {}) {
+async function list(entity, { limit = 100, offset = 0, orderBy, asc = true, filter } = {}) {
   const { list: src, pk } = metaOf(entity);
   let q = sb.from(src).select('*'); // Start the query for the entity
 
   // Apply the filter if there's a column and value
   if (filter?.column && filter?.value) {
-  if (filter.column.includes('.')) {
-    const [table, column] = filter.column.split('.');
-    q = q.select(`${src}.*, ${table}.${column}`) // Join visits and patients to get patient_name
-      .ilike(`${table}.${column}`, `%${filter.value}%`);
-  } else {
-    q = q.ilike(filter.column, `%${filter.value}%`);
-  }
-}
+    const column = filter.column;
 
+    if (column.includes('.')) {
+      const [table, field] = column.split('.');
+
+      if (table === 'patients') {
+        q = q.select(`${src}.*, ${table}.${field}`)
+          .eq(`${src}.patient_id`, `${table}.patient_id`) // Join visits.patient_id to patients.patient_id
+          .ilike(`${table}.${field}`, `%${filter.value}%`); // Filter by patient_name
+      }
+    } else {
+      const value = filter.value;
+      // Check if the filter value is numeric (e.g., visit_id or patient_id)
+      if (Number.isInteger(Number(value))) {
+        q = q.eq(column, Number(value)); // Use eq for numeric fields
+      } else {
+        q = q.ilike(column, `%${value}%`); // Use ilike for string fields like patient_name
+      }
+    }
+  }
 
   // Apply the ordering and limit
   q = q.order(orderBy || pk, { ascending: asc }).range(offset, offset + limit - 1);
 
+  console.log('Query:', q.toString()); // Log the query for debugging
+
   // Execute the query
   const { data, error } = await q;
-  
-  if (error) throw error;
-  
+
+  if (error) {
+    console.error('Error in query:', error);
+    throw error;
+  }
+
   return data || [];
 }
+
+
+
+
+
 
 
   async function get(entity, id) {
